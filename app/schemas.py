@@ -1,9 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 from typing import Optional
 from datetime import datetime
 
 
 class BossConfigSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     id: Optional[int] = None
     debugger: int = 0
     wait_time: int = 10
@@ -25,9 +28,6 @@ class BossConfigSchema(BaseModel):
     dead_status: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class BossBlacklistCreate(BaseModel):
@@ -120,15 +120,14 @@ class BossStatsResponse(BaseModel):
 
 
 class LiepinConfigSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     id: Optional[int] = None
     keywords: Optional[str] = None
     city_code: Optional[str] = None
     salary_code: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class LiepinDataResponse(BaseModel):
@@ -154,15 +153,14 @@ class LiepinStatsResponse(BaseModel):
 
 
 class ZhilianConfigSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     id: Optional[int] = None
     keywords: Optional[str] = None
     city_code: Optional[str] = None
     salary: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ZhilianDataResponse(BaseModel):
@@ -197,15 +195,14 @@ class ZhilianOptionSchema(BaseModel):
 
 
 class Job51ConfigSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
     id: Optional[int] = None
     keywords: Optional[str] = None
     job_area: Optional[str] = None
     salary: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class Job51DataResponse(BaseModel):

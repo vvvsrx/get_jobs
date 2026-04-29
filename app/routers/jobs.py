@@ -384,3 +384,113 @@ async def get_job51_login_status(db: AsyncSession = Depends(get_db)):
         "isLoggedIn": is_logged_in,
         "message": "已登录" if is_logged_in else "未登录",
     }
+
+
+# ========== Login helpers ==========
+_LOGIN_URLS = {
+    "boss": "https://www.zhipin.com/web/geek/jobs",
+    "liepin": "https://www.liepin.com/zhaopin/",
+    "zhilian": "https://www.zhaopin.com/sou/",
+    "job51": "https://we.51job.com/pc/search",
+}
+
+_LOGIN_BOT_CLASSES = {
+    "boss": BossBot,
+    "liepin": LiepinBot,
+    "zhilian": ZhilianBot,
+    "job51": Job51Bot,
+}
+
+
+async def _run_platform_login(platform: str):
+    """Open browser, wait for user login, save cookies."""
+    bot_class = _LOGIN_BOT_CLASSES[platform]
+    url = _LOGIN_URLS[platform]
+    bot = None
+    try:
+        bot = bot_class(config={}, db_session_factory=async_session_maker)
+        await bot.init()
+        await bot.navigate(url)
+
+        sse_manager.publish({
+            "type": "login-status",
+            "platform": platform,
+            "isLoggedIn": False,
+            "message": f"请在新打开的浏览器中登录{platform}",
+        })
+
+        # Wait up to 5 minutes for login
+        for _ in range(100):  # 100 * 3s = 300s
+            await asyncio.sleep(3)
+
+            # Refresh page before checking for platforms that need it
+            if platform == "boss":
+                try:
+                    await bot.navigate(url)
+                    await asyncio.sleep(1)
+                except Exception:
+                    pass
+
+            try:
+                if await bot.is_logged_in():
+                    cookies = await bot.context.cookies()
+                    cookie_json = json.dumps(cookies)
+
+                    async with async_session_maker() as db:
+                        cookie_service = CookieService(db)
+                        await cookie_service.save_cookie(platform, cookie_json, remark="login")
+
+                    sse_manager.publish({
+                        "type": "login-status",
+                        "platform": platform,
+                        "isLoggedIn": True,
+                        "message": f"{platform} 登录成功",
+                    })
+                    return
+            except Exception:
+                pass
+
+        sse_manager.publish({
+            "type": "login-status",
+            "platform": platform,
+            "isLoggedIn": False,
+            "message": f"{platform} 登录超时",
+        })
+    except Exception as e:
+        logger.error("%s login error: %s", platform, e)
+        sse_manager.publish({
+            "type": "login-status",
+            "platform": platform,
+            "isLoggedIn": False,
+            "message": f"{platform} 登录异常: {e}",
+        })
+    finally:
+        if bot:
+            try:
+                await bot.close()
+            except Exception:
+                pass
+
+
+@router.post("/boss/login", response_model=ApiResponse)
+async def login_boss():
+    asyncio.create_task(_run_platform_login("boss"))
+    return ApiResponse(success=True, message="请在打开的浏览器中登录Boss直聘")
+
+
+@router.post("/liepin/login", response_model=ApiResponse)
+async def login_liepin():
+    asyncio.create_task(_run_platform_login("liepin"))
+    return ApiResponse(success=True, message="请在打开的浏览器中登录猎聘")
+
+
+@router.post("/zhilian/login", response_model=ApiResponse)
+async def login_zhilian():
+    asyncio.create_task(_run_platform_login("zhilian"))
+    return ApiResponse(success=True, message="请在打开的浏览器中登录智联招聘")
+
+
+@router.post("/job51/login", response_model=ApiResponse)
+async def login_job51():
+    asyncio.create_task(_run_platform_login("job51"))
+    return ApiResponse(success=True, message="请在打开的浏览器中登录51job")

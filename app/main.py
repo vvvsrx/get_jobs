@@ -59,6 +59,10 @@ async def health_check():
 if os.path.isdir(_STATIC_DIR) and os.path.isfile(_INDEX_HTML):
     @app.get("/{full_path:path}")
     async def serve_static(full_path: str):
+        # Let FastAPI return proper 404 JSON for missing API endpoints
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not Found")
+
         # Prevent directory traversal
         file_path = os.path.normpath(os.path.join(_STATIC_DIR, full_path))
         if not file_path.startswith(os.path.normpath(_STATIC_DIR)):
