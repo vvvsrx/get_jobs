@@ -46,12 +46,13 @@ class BossBlacklistResponse(BaseModel):
 
 
 class BossOptionSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    id: int
     type: str
     name: str
     code: str
-
-    class Config:
-        from_attributes = True
+    sort_order: Optional[int] = None
 
 
 class CookieSchema(BaseModel):
@@ -185,13 +186,24 @@ class ZhilianStatsResponse(BaseModel):
         from_attributes = True
 
 
-class ZhilianOptionSchema(BaseModel):
+class LiepinOptionSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    id: int
     type: str
     name: str
     code: str
+    sort_order: Optional[int] = None
 
-    class Config:
-        from_attributes = True
+
+class ZhilianOptionSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    id: int
+    type: str
+    name: str
+    code: str
+    sort_order: Optional[int] = None
 
 
 class Job51ConfigSchema(BaseModel):
@@ -228,9 +240,10 @@ class Job51StatsResponse(BaseModel):
 
 
 class Job51OptionSchema(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
+
+    id: int
     type: str
     name: str
     code: str
-
-    class Config:
-        from_attributes = True
+    sort_order: Optional[int] = None

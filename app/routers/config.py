@@ -5,8 +5,9 @@ from typing import Optional
 from app.database import get_db
 from app.schemas import (
     BossConfigSchema, BossBlacklistCreate, BossBlacklistResponse,
-    ApiResponse, BossOptionSchema, LiepinConfigSchema, ZhilianConfigSchema,
-    Job51ConfigSchema,
+    ApiResponse, BossOptionSchema, LiepinConfigSchema, LiepinOptionSchema,
+    ZhilianConfigSchema, ZhilianOptionSchema,
+    Job51ConfigSchema, Job51OptionSchema,
 )
 from app.services.config_service import ConfigService
 
@@ -87,7 +88,7 @@ async def get_options(type: str, service: ConfigService = Depends(get_config_ser
 async def get_liepin_config(service: ConfigService = Depends(get_config_service)):
     config = await service.get_or_create_liepin_config()
     options = {
-        "city": [{"type": o.type, "name": o.name, "code": o.code} for o in await service.get_liepin_options_by_type("city")],
+        "city": [LiepinOptionSchema.model_validate(o).model_dump(by_alias=True) for o in await service.get_liepin_options_by_type("city")],
     }
     return {
         "success": True,
@@ -109,7 +110,7 @@ async def update_liepin_config(
 @router.get("/liepin/config/options/{type}", response_model=list)
 async def get_liepin_options(type: str, service: ConfigService = Depends(get_config_service)):
     options = await service.get_liepin_options_by_type(type)
-    return [{"type": o.type, "name": o.name, "code": o.code} for o in options]
+    return [LiepinOptionSchema.model_validate(o).model_dump(by_alias=True) for o in options]
 
 
 # ========== Zhilian ==========
@@ -117,7 +118,7 @@ async def get_liepin_options(type: str, service: ConfigService = Depends(get_con
 async def get_zhilian_config(service: ConfigService = Depends(get_config_service)):
     config = await service.get_or_create_zhilian_config()
     options = {
-        "city": [{"type": o.type, "name": o.name, "code": o.code} for o in await service.get_zhilian_options_by_type("city")],
+        "city": [ZhilianOptionSchema.model_validate(o).model_dump(by_alias=True) for o in await service.get_zhilian_options_by_type("city")],
     }
     return {
         "success": True,
@@ -139,7 +140,7 @@ async def update_zhilian_config(
 @router.get("/zhilian/config/options/{type}", response_model=list)
 async def get_zhilian_options(type: str, service: ConfigService = Depends(get_config_service)):
     options = await service.get_zhilian_options_by_type(type)
-    return [{"type": o.type, "name": o.name, "code": o.code} for o in options]
+    return [ZhilianOptionSchema.model_validate(o).model_dump(by_alias=True) for o in options]
 
 
 # ========== Job51 ==========
@@ -147,8 +148,8 @@ async def get_zhilian_options(type: str, service: ConfigService = Depends(get_co
 async def get_job51_config(service: ConfigService = Depends(get_config_service)):
     config = await service.get_or_create_job51_config()
     options = {
-        "jobArea": [{"type": o.type, "name": o.name, "code": o.code} for o in await service.get_job51_options_by_type("jobArea")],
-        "salary": [{"type": o.type, "name": o.name, "code": o.code} for o in await service.get_job51_options_by_type("salary")],
+        "jobArea": [Job51OptionSchema.model_validate(o).model_dump(by_alias=True) for o in await service.get_job51_options_by_type("jobArea")],
+        "salary": [Job51OptionSchema.model_validate(o).model_dump(by_alias=True) for o in await service.get_job51_options_by_type("salary")],
     }
     return {
         "success": True,
@@ -170,7 +171,7 @@ async def update_job51_config(
 @router.get("/job51/config/options/{type}", response_model=list)
 async def get_job51_options(type: str, service: ConfigService = Depends(get_config_service)):
     options = await service.get_job51_options_by_type(type)
-    return [{"type": o.type, "name": o.name, "code": o.code} for o in options]
+    return [Job51OptionSchema.model_validate(o).model_dump(by_alias=True) for o in options]
 
 
 # ========== Env Config (key-value store) ==========
