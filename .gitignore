@@ -26,6 +26,7 @@ venv/
 
 # Claude
 .claude/
+CLAUDE.md
 
 # Test cache
 .pytest_cache/

@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from typing import Optional
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.models import BossOption, LiepinOption, ZhilianOption, Job51Option
@@ -89,7 +90,7 @@ class OptionSeedService:
         logger.info("Imported %d %s options", len(data), platform)
         return {"imported": len(data), "skipped": False, "error": None}
 
-    async def _scrape_from_web(self, platform: str) -> list | None:
+    async def _scrape_from_web(self, platform: str) -> Optional[list]:
         """Attempt to scrape option data from the platform's website.
 
         This is a best-effort approach that may fail due to site changes.
@@ -108,23 +109,23 @@ class OptionSeedService:
             logger.debug("Web scraping failed for %s: %s", platform, e)
         return None
 
-    async def _scrape_boss(self) -> list | None:
+    async def _scrape_boss(self) -> Optional[list]:
         # TODO: Implement boss scraping if needed
         return None
 
-    async def _scrape_liepin(self) -> list | None:
+    async def _scrape_liepin(self) -> Optional[list]:
         # TODO: Implement liepin scraping if needed
         return None
 
-    async def _scrape_zhilian(self) -> list | None:
+    async def _scrape_zhilian(self) -> Optional[list]:
         # TODO: Implement zhilian scraping if needed
         return None
 
-    async def _scrape_job51(self) -> list | None:
+    async def _scrape_job51(self) -> Optional[list]:
         # TODO: Implement job51 scraping if needed
         return None
 
-    def _get_fallback_data(self, platform: str) -> list | None:
+    def _get_fallback_data(self, platform: str) -> Optional[list]:
         """Return built-in fallback data for the platform."""
         from app.services.option_seed_fallback import (
             BOSS_FALLBACK,

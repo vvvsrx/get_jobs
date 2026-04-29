@@ -1,3 +1,4 @@
+from typing import Optional
 import asyncio
 
 
@@ -5,8 +6,8 @@ class DeliveryState:
     def __init__(self):
         self.running: bool = False
         self.cancel_event: asyncio.Event = asyncio.Event()
-        self.current_platform: str | None = None
-        self.current_job: str | None = None
+        self.current_platform: Optional[str] = None
+        self.current_job: Optional[str] = None
         self.delivered_count: int = 0
         self.filtered_count: int = 0
 

@@ -30,7 +30,7 @@
 
 ## 系统要求
 
-- Python 3.10+
+- Python 3.9+
 - Node.js 18+（用于构建前端）
 - Chrome/Edge 浏览器（用于 Camoufox）
 

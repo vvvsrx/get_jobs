@@ -19,8 +19,8 @@ def main():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
     # 1. Check Python version
-    if sys.version_info < (3, 10):
-        print("Error: Python 3.10+ required")
+    if sys.version_info < (3, 9):
+        print("Error: Python 3.9+ required")
         sys.exit(1)
 
     # 2. Install Python dependencies
