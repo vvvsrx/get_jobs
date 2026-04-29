@@ -13,6 +13,21 @@
 - **数据持久化**：SQLite 本地数据库，记录投递历史
 - **跨平台**：支持 Windows、macOS、Linux
 
+## 项目背景
+
+本项目是对 [loks666/get_jobs](https://github.com/loks666/get_jobs) 的 Python 重构版。
+
+原版基于 Kotlin + Chrome 实现，本项目将其重构为 **Python + FastAPI + Camoufox** 技术栈，以获得更好的跨平台支持和反检测能力。
+
+| 维度 | 原版 | 重构版 |
+|------|------|--------|
+| 后端语言 | Kotlin | Python 3.10+ |
+| Web 框架 | — | FastAPI |
+| ORM | — | SQLAlchemy 2.0 async |
+| 浏览器 | Chrome | Camoufox（反检测） |
+| 数据库 | SQLite | SQLite (aiosqlite) |
+| 前端 | — | Next.js 16 |
+
 ## 系统要求
 
 - Python 3.10+
@@ -24,7 +39,7 @@
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/getjobs.git
+git clone https://github.com/vvvsrx/get_jobs.git
 cd getjobs
 ```
 

@@ -40,5 +40,5 @@ dependencies = [
 getjobs = "run:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/getjobs"
-Issues = "https://github.com/yourusername/getjobs/issues"
+Homepage = "https://github.com/vvvsrx/get_jobs"
+Issues = "https://github.com/vvvsrx/get_jobs/issues"
