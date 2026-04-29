@@ -1,0 +1,41 @@
+# Build outputs
+static/
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# Runtime data
+data/options/*.json
+db/*.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Claude
+.claude/
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Worktrees
+.worktrees/
+worktrees/
