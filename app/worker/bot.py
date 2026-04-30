@@ -188,101 +188,110 @@ class BossBot:
 
     async def deliver_single_job(self, keyword: str, job: dict) -> bool:
         """
-        对单个职位执行投递流程：打开详情页 → 点击立即沟通 → 输入打招呼语 → 发送。
+        在当前页面执行投递流程：右侧面板点击沟通 → 处理弹框 → 输入打招呼语 → 发送。
         返回 True 表示投递成功。
         """
         if self.config.get("debugger"):
             logger.info("调试模式：仅遍历 | 公司：%s | 岗位：%s", job.get("company_name"), job.get("job_name"))
             return False
 
-        more_btn = self.page.locator("a.more-job-btn")
-        if await more_btn.count() == 0:
-            logger.warning("未找到'查看更多信息'按钮，跳过")
-            return False
-        href = await more_btn.first.get_attribute("href")
-        if not href or not href.startswith("/job_detail/"):
-            logger.warning("未获取到岗位详情链接，跳过")
-            return False
-        detail_url = "https://www.zhipin.com" + href
+        page = self.page
 
-        detail_page = await self.context.new_page()
-        try:
-            await detail_page.goto(detail_url, wait_until="domcontentloaded", timeout=15000)
-            await asyncio.sleep(1)
-
-            chat_btn = detail_page.locator("a.btn-startchat, a.op-btn-chat")
-            found = False
-            for _ in range(5):
-                if await chat_btn.count() > 0:
-                    text = await chat_btn.first.text_content()
-                    if text and "立即沟通" in text:
-                        found = True
-                        break
-                await asyncio.sleep(1)
-            if not found:
-                logger.warning("未找到立即沟通按钮，跳过：%s", job.get("job_name"))
-                return False
-            await chat_btn.first.click()
-            await asyncio.sleep(1)
-
-            input_locator = detail_page.locator("div#chat-input.chat-input[contenteditable='true'], textarea.input-area")
-            ready = False
-            for _ in range(10):
-                if await input_locator.count() > 0 and await input_locator.first.is_visible():
-                    ready = True
+        # 1. 在右侧面板中查找"立即沟通"或"沟通"按钮
+        chat_btn = page.locator(
+            "a.btn-startchat, a.op-btn-chat, .job-sec-bottom a[ka^='job-detail-top'], "
+            "button:has-text('立即沟通'), button:has-text('沟通'), "
+            "a:has-text('立即沟通'), a:has-text('沟通')"
+        )
+        found = False
+        for _ in range(5):
+            if await chat_btn.count() > 0:
+                text = await chat_btn.first.text_content() or ""
+                if any(k in text for k in ("立即沟通", "沟通", "打招呼")):
+                    found = True
                     break
-                await asyncio.sleep(1)
-            if not ready:
-                logger.warning("聊天输入框未出现，跳过：%s", job.get("job_name"))
-                return False
-
-            message = self.config.get("say_hi", "您好，我对这个岗位很感兴趣")
-            if self.config.get("enable_ai"):
-                try:
-                    from app.services.ai_service import AiService
-                    async with self.db_session_factory() as session:
-                        ai_service = AiService(session)
-                        ai_msg = await ai_service.generate_message(
-                            introduce="",
-                            keyword=keyword,
-                            job_name=job.get("job_name", ""),
-                            jd=job.get("job_description", ""),
-                            say_hi=message,
-                        )
-                        if ai_msg:
-                            message = ai_msg
-                except Exception as e:
-                    logger.warning("AI 生成问候语失败，使用默认：%s", e)
-
-            inp = input_locator.first
-            await inp.click()
-            tag = await inp.evaluate("el => el.tagName.toLowerCase()")
-            if tag == "textarea":
-                await inp.fill(message)
-            else:
-                await inp.evaluate("(el, msg) => { el.innerText = msg; el.dispatchEvent(new Event('input')); }", message)
-
-            send_btn = detail_page.locator("div.send-message, button[type='send'].btn-send, button.btn-send")
-            if await send_btn.count() > 0:
-                await send_btn.first.click()
-                await asyncio.sleep(1)
-                try:
-                    close_btn = detail_page.locator("i.icon-close")
-                    if await close_btn.count() > 0:
-                        await close_btn.first.click()
-                except Exception:
-                    pass
-                logger.info("投递完成 | 公司：%s | 岗位：%s | 招呼语：%s", job.get("company_name"), job.get("job_name"), message)
-                return True
-            else:
-                logger.warning("未找到发送按钮，跳过：%s", job.get("job_name"))
-                return False
-        finally:
-            try:
-                await detail_page.close()
-            except Exception:
-                pass
             await asyncio.sleep(1)
+        if not found:
+            logger.warning("未找到沟通按钮，跳过：%s", job.get("job_name"))
+            return False
+        await chat_btn.first.click()
+        await asyncio.sleep(2)
+
+        # 2. 判断是否弹出"继续沟通"确认框，有则点击
+        confirm_btn = page.locator(
+            "button:has-text('继续沟通'), a:has-text('继续沟通'), "
+            ".dialog-container button:has-text('继续沟通'), "
+            ".dialog-con button:has-text('继续沟通')"
+        )
+        for _ in range(3):
+            if await confirm_btn.count() > 0 and await confirm_btn.first.is_visible():
+                await confirm_btn.first.click()
+                await asyncio.sleep(2)
+                break
+            await asyncio.sleep(1)
+
+        # 3. 等待聊天输入框出现
+        input_locator = page.locator(
+            "div#chat-input.chat-input[contenteditable='true'], "
+            "textarea.input-area, "
+            "div[contenteditable='true'].chat-input, "
+            "#chat-input"
+        )
+        ready = False
+        for _ in range(10):
+            if await input_locator.count() > 0 and await input_locator.first.is_visible():
+                ready = True
+                break
+            await asyncio.sleep(1)
+        if not ready:
+            logger.warning("聊天输入框未出现，跳过：%s", job.get("job_name"))
+            return False
+
+        # 4. 生成招呼语
+        message = self.config.get("say_hi", "您好，我对这个岗位很感兴趣")
+        if self.config.get("enable_ai"):
+            try:
+                from app.services.ai_service import AiService
+                async with self.db_session_factory() as session:
+                    ai_service = AiService(session)
+                    ai_msg = await ai_service.generate_message(
+                        introduce="",
+                        keyword=keyword,
+                        job_name=job.get("job_name", ""),
+                        jd=job.get("job_description", ""),
+                        say_hi=message,
+                    )
+                    if ai_msg:
+                        message = ai_msg
+            except Exception as e:
+                logger.warning("AI 生成问候语失败，使用默认：%s", e)
+
+        # 5. 输入招呼语
+        inp = input_locator.first
+        await inp.click()
+        tag = await inp.evaluate("el => el.tagName.toLowerCase()")
+        if tag == "textarea":
+            await inp.fill(message)
+        else:
+            await inp.evaluate(
+                "(el, msg) => { el.innerText = msg; el.dispatchEvent(new Event('input', {bubbles: true})); }",
+                message,
+            )
+        await asyncio.sleep(1)
+
+        # 6. 点击发送
+        send_btn = page.locator(
+            "button[type='send'], .btn-send, div.send-message, "
+            "button:has-text('发送'), .im-send-btn"
+        )
+        if await send_btn.count() > 0:
+            await send_btn.first.click()
+            await asyncio.sleep(1)
+            logger.info("投递完成 | 公司：%s | 岗位：%s | 招呼语：%s", job.get("company_name"), job.get("job_name"), message)
+            return True
+        else:
+            logger.warning("未找到发送按钮，跳过：%s", job.get("job_name"))
+            return False
 
     async def run_delivery(self):
         """
