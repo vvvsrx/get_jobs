@@ -306,6 +306,18 @@ class BossBot:
             db_config = await config_service.get_or_create_boss_config()
             blacklist_items = await config_service.get_blacklist()
 
+        # 同步数据库配置到 self.config，供 deliver_single_job 使用
+        self.config = {
+            "say_hi": db_config.say_hi,
+            "debugger": db_config.debugger,
+            "enable_ai": db_config.enable_ai,
+            "expected_salary_min": db_config.expected_salary_min,
+            "expected_salary_max": db_config.expected_salary_max,
+            "dead_status": db_config.dead_status,
+            "filter_dead_hr": db_config.filter_dead_hr,
+            "wait_time": db_config.wait_time,
+        }
+
         black_companies = {b.value for b in blacklist_items if b.type == "company"}
         black_recruiters = {b.value for b in blacklist_items if b.type == "recruiter"}
         black_jobs = {b.value for b in blacklist_items if b.type == "job"}
