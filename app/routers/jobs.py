@@ -420,16 +420,8 @@ async def _run_platform_login(platform: str):
         })
 
         # Wait up to 5 minutes for login
-        for _ in range(100):  # 100 * 3s = 300s
-            await asyncio.sleep(3)
-
-            # Refresh page before checking for platforms that need it
-            if platform == "boss":
-                try:
-                    await bot.navigate(url)
-                    await asyncio.sleep(1)
-                except Exception:
-                    pass
+        for _ in range(60):  # 60 * 5s = 300s
+            await asyncio.sleep(5)
 
             try:
                 if await bot.is_logged_in():
