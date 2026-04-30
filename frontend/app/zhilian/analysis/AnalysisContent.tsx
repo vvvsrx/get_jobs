@@ -53,7 +53,7 @@ type PagedResult = {
   size: number
 }
 
-const API_BASE = process.env.API_BASE_URL || "http://localhost:8888"
+const API_BASE = process.env.API_BASE_URL || ""
 
 const CATEGORY_COLORS = [
   "#3b82f6",

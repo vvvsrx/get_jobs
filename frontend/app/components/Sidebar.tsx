@@ -26,7 +26,7 @@ export default function Sidebar() {
     const check = async () => {
       if (checking) return
       setChecking(true)
-      const baseUrl = process.env.API_BASE_URL || 'http://localhost:8888'
+      const baseUrl = process.env.API_BASE_URL || ''
 
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 3000)

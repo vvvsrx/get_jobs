@@ -49,7 +49,7 @@ app.include_router(sse.router, prefix="/api")
 
 @app.get("/api/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "UP"}
 
 
 # SPA fallback: Next.js static export writes pages as {route}.html.

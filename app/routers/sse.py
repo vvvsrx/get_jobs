@@ -12,16 +12,24 @@ from app.services.cookie_service import CookieService
 router = APIRouter()
 
 
+def _extract_sse_json(event: str) -> dict:
+    """从 SSE 格式字符串中提取 JSON data。"""
+    for line in event.split("\n"):
+        if line.startswith("data: "):
+            return json.loads(line[6:])
+    return {}
+
+
 async def _platform_sse_event_generator(
     connected_message: str,
     platform: Optional[str] = None,
 ) -> AsyncGenerator[str, None]:
     """Generate SSE events, optionally filtering by platform."""
-    yield f"data: {json.dumps({'type': 'connected', 'message': connected_message})}\n\n"
+    yield f"event: connected\ndata: {json.dumps({'type': 'connected', 'message': connected_message})}\n\n"
     async for event in sse_manager.subscribe():
         if platform is not None:
             try:
-                data = json.loads(event.removeprefix("data: "))
+                data = _extract_sse_json(event)
                 if data.get("platform") != platform:
                     continue
             except (json.JSONDecodeError, AttributeError):
@@ -91,7 +99,7 @@ async def _login_status_event_generator(
             cookie_service, platform
         )
 
-    yield f"data: {json.dumps({'type': 'connected', 'message': '已连接到登录状态推送', **initial_status})}\n\n"
+    yield f"event: connected\ndata: {json.dumps({'type': 'connected', 'message': '已连接到登录状态推送', **initial_status})}\n\n"
 
     # Subscribe to SSE manager for login-related events
     async for event in sse_manager.subscribe():

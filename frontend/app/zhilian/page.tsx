@@ -45,7 +45,7 @@ export default function ZhilianPage() {
       return
     }
 
-    const client = createSSEWithBackoff('http://localhost:8888/api/jobs/login-status/stream', {
+    const client = createSSEWithBackoff('/api/jobs/login-status/stream', {
       onOpen: () => console.log('[智联招聘 SSE] 连接已打开'),
       onError: (e, attempt, delay) => {
         console.warn(`[智联招聘 SSE] 连接错误，第${attempt}次重连，延迟 ${delay}ms`, e)
@@ -117,7 +117,7 @@ export default function ZhilianPage() {
 
   const fetchAllData = async () => {
     try {
-      const res = await fetch('http://localhost:8888/api/zhilian/config')
+      const res = await fetch('/api/zhilian/config')
       const data = await res.json()
       if (data.config) {
         const normalized = { ...data.config }
@@ -138,7 +138,7 @@ export default function ZhilianPage() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('http://localhost:8888/api/zhilian/config', { method: 'GET' })
+        const res = await fetch('/api/zhilian/config', { method: 'GET' })
         const ok = !!res && res.ok
         setBackendAvailable(ok)
         if (ok) {
@@ -164,7 +164,7 @@ export default function ZhilianPage() {
   const handleLogin = async () => {
     try {
       setIsLoggingIn(true)
-      const response = await fetch('http://localhost:8888/api/zhilian/login', {
+      const response = await fetch('/api/zhilian/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
@@ -183,7 +183,7 @@ export default function ZhilianPage() {
   const handleStartDelivery = async () => {
     try {
       setIsDelivering(true)
-      const response = await fetch('http://localhost:8888/api/zhilian/start', { method: 'POST' })
+      const response = await fetch('/api/zhilian/start', { method: 'POST' })
       const data = await response.json()
       if (!data.success) setIsDelivering(false)
     } catch (error) {
@@ -193,7 +193,7 @@ export default function ZhilianPage() {
 
   const handleStopDelivery = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/zhilian/stop', { method: 'POST' })
+      const response = await fetch('/api/zhilian/stop', { method: 'POST' })
       const data = await response.json()
       if (data.success) setIsDelivering(false)
     } catch (error) {}
@@ -201,7 +201,7 @@ export default function ZhilianPage() {
 
   const triggerLogout = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/zhilian/logout', { method: 'POST' })
+      const response = await fetch('/api/zhilian/logout', { method: 'POST' })
       const data = await response.json()
       setIsLoggedIn(false)
       setLogoutResult({ success: data.success, message: data.success ? '已退出登录，Cookie已清空。' : data.message })
@@ -214,7 +214,7 @@ export default function ZhilianPage() {
 
   const handleSaveCookie = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/cookie/save?platform=zhilian', { method: 'POST' })
+      const response = await fetch('/api/cookie/save?platform=zhilian', { method: 'POST' })
       const data = await response.json()
       setSaveResult({ success: data.success, message: data.success ? '配置保存成功。' : data.message })
       setShowSaveDialog(true)
@@ -227,13 +227,13 @@ export default function ZhilianPage() {
   const handleSaveConfig = async () => {
     try {
       const payload = { ...config, keywords: serializeKeywordsForDb(config.keywords) }
-      const response = await fetch('http://localhost:8888/api/zhilian/config', {
+      const response = await fetch('/api/zhilian/config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       if (response.ok) {
-        try { await fetch('http://localhost:8888/api/cookie/save?platform=zhilian', { method: 'POST' }) } catch {}
+        try { await fetch('/api/cookie/save?platform=zhilian', { method: 'POST' }) } catch {}
         await fetchAllData()
         setSaveResult({ success: true, message: '保存成功，配置已更新。' })
       } else {

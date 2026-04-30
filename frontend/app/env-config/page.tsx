@@ -30,7 +30,7 @@ export default function EnvConfig() {
   const fetchConfig = async () => {
     try {
       setLoading(true)
-      const response = await fetch('http://localhost:8888/api/config', {
+      const response = await fetch('/api/config', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export default function EnvConfig() {
         BOT_IS_SEND: String(envConfig.botIsSend ?? 0),
       }
 
-      const response = await fetch('http://localhost:8888/api/config', {
+      const response = await fetch('/api/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export default function EnvConfig() {
   const handleImportOptions = async () => {
     try {
       setImporting(true)
-      const response = await fetch('http://localhost:8888/api/config/options/import', {
+      const response = await fetch('/api/config/options/import', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -63,7 +63,7 @@ export default function LiepinPage() {
       return
     }
 
-    const client = createSSEWithBackoff('http://localhost:8888/api/jobs/login-status/stream', {
+    const client = createSSEWithBackoff('/api/jobs/login-status/stream', {
       onOpen: () => {
         console.log('[SSE] 连接已打开')
       },
@@ -137,7 +137,7 @@ export default function LiepinPage() {
 
   const fetchAllData = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/liepin/config')
+      const response = await fetch('/api/liepin/config')
       const data = await response.json()
 
       console.log('Fetched liepin data:', data)
@@ -172,7 +172,7 @@ export default function LiepinPage() {
   const handleSave = async () => {
     try {
       const payload = { ...config, keywords: serializeKeywordsForDb(config.keywords) }
-      const response = await fetch('http://localhost:8888/api/liepin/config', {
+      const response = await fetch('/api/liepin/config', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -183,7 +183,7 @@ export default function LiepinPage() {
       if (response.ok) {
         // 统一保存 Cookie（Liepin）
         try {
-          await fetch('http://localhost:8888/api/cookie/save?platform=liepin', { method: 'POST' })
+          await fetch('/api/cookie/save?platform=liepin', { method: 'POST' })
         } catch (e) {
           console.warn('保存 Cookie 失败（Liepin）:', e)
         }
@@ -213,7 +213,7 @@ export default function LiepinPage() {
   const handleLogin = async () => {
     try {
       setIsLoggingIn(true)
-      const response = await fetch('http://localhost:8888/api/liepin/login', {
+      const response = await fetch('/api/liepin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       })
@@ -232,7 +232,7 @@ export default function LiepinPage() {
   const handleStartDelivery = async () => {
     try {
       setIsDelivering(true)
-      const response = await fetch('http://localhost:8888/api/liepin/start', {
+      const response = await fetch('/api/liepin/start', {
         method: 'POST',
       })
       const data = await response.json()
@@ -253,7 +253,7 @@ export default function LiepinPage() {
 
   const handleStopDelivery = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/liepin/stop', {
+      const response = await fetch('/api/liepin/stop', {
         method: 'POST',
       })
       const data = await response.json()
@@ -273,7 +273,7 @@ export default function LiepinPage() {
 
   const triggerLogout = async () => {
     try {
-      const response = await fetch('http://localhost:8888/api/liepin/logout', { method: 'POST' })
+      const response = await fetch('/api/liepin/logout', { method: 'POST' })
       const data = await response.json()
       if (data.success) {
         setIsLoggedIn(false)

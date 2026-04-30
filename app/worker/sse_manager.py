@@ -15,7 +15,8 @@ class SSEManager:
                 message = await queue.get()
                 if message is None:
                     break
-                yield f"data: {json.dumps(message)}\n\n"
+                event_type = message.get("type", "message")
+                yield f"event: {event_type}\ndata: {json.dumps(message)}\n\n"
         finally:
             if queue in self._queues:
                 self._queues.remove(queue)

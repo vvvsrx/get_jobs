@@ -56,7 +56,7 @@ type PagedResult51 = {
   size: number
 }
 
-const API_BASE = process.env.API_BASE_URL || "http://localhost:8888"
+const API_BASE = process.env.API_BASE_URL || ""
 const CATEGORY_COLORS = [
   "#3b82f6","#10b981","#f59e0b","#ef4444","#6366f1","#22c55e","#fb7185","#a78bfa","#f97316","#06b6d4"
 ]
@@ -128,7 +128,7 @@ export default function AnalysisContent({ showHeader = false }:{ showHeader?: bo
     if (keyword) params.set("keyword", keyword)
     params.set("page", String(toPage))
     params.set("size", String(toSize))
-    try{ setLoadingList(true); const res = await fetch(`${API_BASE}/api/51job/list?${params.toString()}`); const data:PagedResult51 = await res.json(); setItems(data.items||[]); setTotal(data.total||0); setPage(data.page||toPage); setSize(data.size||toSize) }catch(e){ console.error("fetch list failed",e) } finally { setLoadingList(false) }
+    try{ setLoadingList(true); const res = await fetch(`${API_BASE}/api/job51/list?${params.toString()}`); const data:PagedResult51 = await res.json(); setItems(data.items||[]); setTotal(data.total||0); setPage(data.page||toPage); setSize(data.size||toSize) }catch(e){ console.error("fetch list failed",e) } finally { setLoadingList(false) }
   }
 
   const loadStats = async ()=>{
@@ -140,13 +140,13 @@ export default function AnalysisContent({ showHeader = false }:{ showHeader?: bo
     if (minK) params.set("minK", String(Number(minK)))
     if (maxK) params.set("maxK", String(Number(maxK)))
     if (keyword) params.set("keyword", keyword)
-    try{ setLoadingStats(true); const res = await fetch(`${API_BASE}/api/51job/stats?${params.toString()}`); const data:StatsResponse = await res.json(); setStats(data) }catch(e){ console.error("fetch stats failed",e) } finally { setLoadingStats(false) }
+    try{ setLoadingStats(true); const res = await fetch(`${API_BASE}/api/job51/stats?${params.toString()}`); const data:StatsResponse = await res.json(); setStats(data) }catch(e){ console.error("fetch stats failed",e) } finally { setLoadingStats(false) }
   }
 
   useEffect(()=>{ loadList(1,size) },[])
 
   const onReload = async ()=>{
-    try{ setReloading(true); const res=await fetch(`${API_BASE}/api/51job/reload`); const data=await res.json(); console.log("reload",data); await loadList(1,size); await loadStats() }catch(e){ console.error("reload failed",e) } finally { setReloading(false) }
+    try{ setReloading(true); const res=await fetch(`${API_BASE}/api/job51/reload`); const data=await res.json(); console.log("reload",data); await loadList(1,size); await loadStats() }catch(e){ console.error("reload failed",e) } finally { setReloading(false) }
   }
 
   const exportCSV = async ()=>{
@@ -161,7 +161,7 @@ export default function AnalysisContent({ showHeader = false }:{ showHeader?: bo
       if (keyword) baseParams.set("keyword", keyword)
 
       const pageSize=1000; let currentPage=1; let all:Job51Item[]=[]; let totalCount=0
-      while(true){ const params=new URLSearchParams(baseParams); params.set("page", String(currentPage)); params.set("size", String(pageSize)); const res=await fetch(`${API_BASE}/api/51job/list?${params.toString()}`); const data:PagedResult51=await res.json(); const chunk=data.items||[]; if (currentPage===1) totalCount=data.total||chunk.length; all=all.concat(chunk); if (all.length>=totalCount || chunk.length===0) break; currentPage+=1 }
+      while(true){ const params=new URLSearchParams(baseParams); params.set("page", String(currentPage)); params.set("size", String(pageSize)); const res=await fetch(`${API_BASE}/api/job51/list?${params.toString()}`); const data:PagedResult51=await res.json(); const chunk=data.items||[]; if (currentPage===1) totalCount=data.total||chunk.length; all=all.concat(chunk); if (all.length>=totalCount || chunk.length===0) break; currentPage+=1 }
 
       const header=["公司名称","岗位名称","薪资","地点","经验","学历","HR","投递状态","链接","行业","公司规模","发布时间","创建时间"]
       const rows = all.map(it=>[

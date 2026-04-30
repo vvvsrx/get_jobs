@@ -26,7 +26,7 @@ interface Job51Options { jobArea: Job51Option[]; salary: Job51Option[] }
 const MAX_SALARY_SELECTIONS = 5
 
 export default function Job51Page() {
-  const API = process.env.API_BASE_URL || 'http://localhost:8888'
+  const API = process.env.API_BASE_URL || ''
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isDelivering, setIsDelivering] = useState(false)
   const [checkingLogin, setCheckingLogin] = useState(true)
@@ -206,7 +206,7 @@ export default function Job51Page() {
 
   const fetchAllData = async () => {
     try {
-      const res = await fetch(`${API}/api/51job/config`)
+      const res = await fetch(`${API}/api/job51/config`)
       if (!res.ok) {
         console.warn(`[51job] 获取配置失败: ${res.status}`)
         setConfig({ keywords: '', jobArea: '', salary: '' })
@@ -257,7 +257,7 @@ export default function Job51Page() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`${API}/api/51job/config`, { method: 'GET' })
+        const res = await fetch(`${API}/api/job51/config`, { method: 'GET' })
         const ok = !!res && res.ok
         setBackendAvailable(ok)
         if (ok) {
@@ -301,7 +301,7 @@ export default function Job51Page() {
   const handleStartDelivery = async () => {
     try {
       setIsDelivering(true)
-      const response = await fetch(`${API}/api/51job/start`, { method: 'POST' })
+      const response = await fetch(`${API}/api/job51/start`, { method: 'POST' })
       const data = await response.json()
       if (!data.success) {
         console.warn('[51job] 启动失败：', data.message)
@@ -317,7 +317,7 @@ export default function Job51Page() {
 
   const handleStopDelivery = async () => {
     try {
-      const response = await fetch(`${API}/api/51job/stop`, { method: 'POST' })
+      const response = await fetch(`${API}/api/job51/stop`, { method: 'POST' })
       if (!response.ok) {
         // 后端返回错误状态码，恢复按钮
         console.warn('[51job] 停止投递请求失败，状态码:', response.status)
@@ -346,7 +346,7 @@ export default function Job51Page() {
 
   const triggerLogout = async () => {
     try {
-      const response = await fetch(`${API}/api/51job/logout`, { method: 'POST' })
+      const response = await fetch(`${API}/api/job51/logout`, { method: 'POST' })
       const data = await response.json()
       setIsLoggedIn(false)
       setLogoutResult({ success: data.success, message: data.success ? '已退出登录，Cookie已清空。' : data.message })
@@ -399,7 +399,7 @@ export default function Job51Page() {
         jobArea: toBracketListString(config.jobArea, 'jobArea'),
         salary: toBracketListString(config.salary, 'salary'),
       }
-      const response = await fetch(`${API}/api/51job/config`, {
+      const response = await fetch(`${API}/api/job51/config`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
