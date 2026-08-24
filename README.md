@@ -1,3 +1,8 @@
+# 不再维护
+
+该项目已经不再维护,最后是使用kimi work和GPT work直接控制浏览器投递的.更安全方便.
+项目不关闭,只给一个参考.感谢关注.
+
 # GetJobs — 智能求职自动投递工具
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
